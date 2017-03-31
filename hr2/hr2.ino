@@ -11,7 +11,7 @@ void setup() {
   pinMode(interruptPin, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(interruptPin), blink, RISING);
   Serial.begin(9600);
-  Serial.println("Get ready...");
+  //Serial.println("Get ready...");
   delay(5000);
   time1 = millis();
   // Serial.print("Start time: ");
@@ -24,10 +24,10 @@ void loop() {
 
 void blink() {
   if (count > 0) {
-    Serial.print("HR: ");
+    //Serial.print("HR: ");
     time2 = millis();
     hr = 60000 / (time2 - time1);
-    Serial.println(hr, DEC);
+    Serial.println(hr);
     time1 = time2;
   } else {
     count += 1;
