@@ -26,5 +26,6 @@ y2 = [x.split(',') for x in y2]
 
 with open('some.csv', 'w', newline='') as f:
     writer = csv.writer(f)
+    writer.writerow(['HR', 'Time(ms)'])
     writer.writerows(y2[1:])
     
