@@ -10,57 +10,60 @@
 library(shiny)
 
 # Define server logic required to draw a histogram
-shinyServer(function(input, output) {
+shinyServer(function(input, output, clientData, session) {
   
-    output$plot1 <- renderPlot({
+  observe({
+    c_f <- input$file1
+    
+    if(!is.null(c_f)) {
+      tmp <- read.csv(c_f$datapath, header=TRUE)
+      min.T <- round(min(tmp$Time.ms, na.rm=TRUE)/1000)
+      max.T <- round(max(tmp$Time.ms, na.rm=TRUE)/1000)
+      updateSliderInput(session, 'start_end_time', val=c(min.T, max.T), 
+                        min=min.T,  max=max.T)
+      
+      min.hr <- round(min(tmp$HR, na.rm=TRUE))
+      max.hr <- round(max(tmp$HR, na.rm=TRUE))
+      updateSliderInput(session, 'hr_limits', val=c(min.hr, max.hr), 
+                        min=min.hr,  max=max.hr)
+    }
+  }
+  )
   
-      inFile <- input$file1
-      if(is.null(inFile))
-        return(NULL)
-      dat1 <- read.csv(inFile$datapath, header=TRUE)
+  output$mean1 <- renderText({
+    c_f <- input$file1
     
-      # plot time series
-      xvals <- dat1[,2]/1000
-      yvals <- dat1[,1]
-      xlims = input$xlims
-      ylims= input$ylims
-      
-      # make plot
-      plot(xvals, yvals, type='b', col='darkorange2',
-           xlim=xlims, ylim=ylims, pch=20,
-           xlab='Time (s)', ylab='Heart Rate')
-      grid()
-      
-    })
+    if(!is.null(c_f)) {
+      tmp <- read.csv(c_f$datapath, header=TRUE)
+      mn1 <- round(mean(tmp$HR, na.rm=TRUE))
+      paste("Mean HR:", mn1)
+    } else {
+      return(NULL)
+    }
+  }  )
+  
+  output$med1 <- renderText({
+    c_f <- input$file1
     
-      output$text1 <-  renderUI( { 
-        inFile <- input$file1
-        
-        if(!is.null(input$file1)) {
-          dat1 <- read.csv(inFile$datapath, header=TRUE)
-          xlims = input$xlims
-          ylims= input$ylims
-          
-          str1 <- paste('Length of recording: ', round(dat1[nrow(dat1),2]/1000),
-                  'seconds')
-          str2 <- paste('Max. HR: ', round(max(dat1[,1])))
-          
-          id <- which(dat1$Time.ms./1000 < xlims[2] & 
-                      dat1$Time.ms./1000 > xlims[1])
-          tmp1 <- mean(dat1$HR[id], na.rm=TRUE)
-          str3 <- paste('Mean. HR: ', round(tmp1))
-          
-          tmp2 <- median(dat1$HR[id], na.rm=TRUE)
-          str4 <- paste('Median. HR: ', round(tmp2))
-          
-          tmp3 <- length(id)
-          str5 <- paste('No. of points: ', tmp3)
-          HTML(paste(str1, str2, str3, str4, str5, sep='<br/>'))
-        } else {
-          paste('Choose a file')
-        }
-        
-        } )
-  }  
-
+    if(!is.null(c_f)) {
+      tmp <- read.csv(c_f$datapath, header=TRUE)
+      mn1 <- round(median(tmp$HR, na.rm=TRUE))
+      paste("Median HR:", mn1)
+    } else {
+      return(NULL)
+    }
+  }  )
+  
+  output$nobs <- renderText({
+    c_f <- input$file1
+    
+    if(!is.null(c_f)) {
+      tmp <- read.csv(c_f$datapath, header=TRUE)
+      paste("No. of obs:", nrow(tmp))
+    } else {
+      return(NULL)
+    }
+  }  )
+  
+  }
 )

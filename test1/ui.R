@@ -16,14 +16,20 @@ shinyUI(fluidPage(
   titlePanel("Analysing Polygraph Data"),
   
   sidebarLayout(
-    sidebarPanel(fileInput("file1", "Choose CSV File",
-                           accept = c("text/csv",
-                             "text/comma-separated-values,text/plain",
-                             ".csv") ),
-                 sliderInput("xlims", "Start / End Time", min=0, 
-                             max=600, value=c(0, 600)),
-                 sliderInput("ylims", "HR Limits", min=0, max=250,
-                             value=c(50, 150)),
-                 htmlOutput("text1")),
-    mainPanel( plotOutput("plot1") )
-    )))
+    sidebarPanel(
+      fileInput("file1", "Choose CSV File",
+                accept = c("text/csv", 
+                           "text/comma-separated-values,text/plain", ".csv")
+      ),
+      sliderInput('start_end_time', 'Start / End Times', value=c(10, 590), min =0, max=600),
+      sliderInput('hr_limits', 'HR Limits', value=c(60, 80), min =30, max=120),
+      textOutput('mean1'),
+      textOutput('med1'),
+      textOutput('nobs')
+    ),
+    mainPanel(
+      plotOutput('plot1')
+    )
+  )
+))
+  
