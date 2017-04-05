@@ -20,12 +20,29 @@ shinyServer(function(input, output, clientData, session) {
       min.T <- round(min(tmp$Time.ms, na.rm=TRUE)/1000)
       max.T <- round(max(tmp$Time.ms, na.rm=TRUE)/1000)
       updateSliderInput(session, 'start_end_time', val=c(min.T, max.T), 
-                        min=min.T,  max=max.T)
+                        min=round(0.8*min.T),  max=round(1.2*max.T))
       
       min.hr <- round(min(tmp$HR, na.rm=TRUE))
       max.hr <- round(max(tmp$HR, na.rm=TRUE))
       updateSliderInput(session, 'hr_limits', val=c(min.hr, max.hr), 
                         min=round(0.8*min.hr),  max=round(1.2*max.hr))
+    }
+  }
+  )
+  
+  output$fproc <- renderText( {
+    c_f2 <- input$file2
+    
+    if(!is.null(c_f2)) {
+      tmp2 <- read.csv(c_f2$datapath, header=TRUE)
+      tmp2$HR <- smooth(tmp2$HR, kind='3RSS')
+      n1 <- nchar(c_f2$name)
+      new_name <- paste('../', substring(c_f2$name, first=1, last=n1-4), "_proc.csv", 
+                        sep="")
+      write.csv(tmp2, new_name)
+      paste(paste('Processed', c_f2$name, sep=' '))
+    } else {
+      paste("No file processed")
     }
   }
   )
