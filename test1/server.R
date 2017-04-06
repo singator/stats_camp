@@ -104,7 +104,9 @@ shinyServer(function(input, output, clientData, session) {
       
       plot(xvals, yvals, type='b', col='darkorange', xlab='Time (s)',
            ylab='Heart Rate per minute', xlim=xlim2, ylim=ylim2)
-      grid()
+      x_dot <- seq(xlim2[1], xlim2[2], by = 15)
+      abline(v=x_dot, col='gray', lty=2)
+      grid(ny=NULL, nx=NA)
     } else {
       return(NULL)
     }
