@@ -17,7 +17,7 @@ shinyUI(fluidPage(
   
   sidebarLayout(
     sidebarPanel(
-      fileInput("file1", "Choose CSV File",
+      fileInput("file1", "Choose file to plot",
                 accept = c("text/csv", 
                            "text/comma-separated-values,text/plain", ".csv")
       ),
@@ -25,7 +25,12 @@ shinyUI(fluidPage(
       sliderInput('hr_limits', 'HR Limits', value=c(60, 80), min =30, max=120),
       textOutput('mean1'),
       textOutput('med1'),
-      textOutput('nobs')
+      textOutput('nobs'),
+      br(),
+      fileInput('file2', 'Choose file to process',
+                accept = c("text/csv", 
+                           "text/comma-separated-values,text/plain", ".csv")),
+      textOutput('fproc')
     ),
     mainPanel(
       plotOutput('plot1')
