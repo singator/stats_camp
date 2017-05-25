@@ -1,0 +1,76 @@
+---
+title: "What Does A Statistician Do?"
+author: "Vik"
+date: "02 June 2017"
+output: 
+  beamer_presentation: 
+    keep_tex: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# Introduction
+
+## Decisions
+
+- A statistician uses numbers to **help** make **decisions**.
+- It is important to note the following:
+    - **help**: It means that this is not the only way, and no one says it is the
+    best way.
+    - **decisions**: It shouldn't just be to entertain ourselves.
+    
+# How
+
+## An Ideal Framework For Decisions
+
+1. Identify what the space of decisions will be.
+2. Collect **data**.
+3. **Clean, visualise** and **summarise** the data.
+4. Use the data to come up with a **decision rule**.
+5. Apply the decision rule to new data and **assess its performance**.
+6. Back to step 1 to **improve** the decision rule.
+
+# Our Experiment
+
+## Corresponding Elements in Our Simulated Experiment
+
+Due to constraints, we are unable to replicate the entire framework in our 
+scenario. However, here are some matching elements:
+
+1. Decision space: Lying or Not lying?
+2. Data collection: Arduino, together with a heart rate monitor.
+3. Cleaning, visualisation, summary:
+    - a simple smoothing technique invented by John W. Tukey.
+    - nothing more complicated than a median.
+    - the R programming language (shiny package).
+4. What was our decision rule?
+
+How can we improve each aspect?
+
+# Skills
+
+## What Do I Need To Be A Statistician?
+
+*Far better an approximate answer to the right question, which is often vague,
+than an exact answer to the wrong question, which can always be made precise.*
+
+-- John W. Tukey
+
+- A desire to help make good decisions.
+- A curiosity about finding relationships in data.
+- An interest in computing.
+
+# References
+
+## More Information
+
+- On Arduino:
+    - <https://www.arduino.cc/> for how-to's, reference documentation.
+    - <https://www.sgbotic.com/> for purchases.
+- On R:
+    - <https://cran.r-project.org/> to download R.
+    - <https://shiny.rstudio.com/tutorial/> for information on shiny.
+- On Exploring Data:
+    - "Exploratory Data Analysis" by John W. Tukey (1976).
