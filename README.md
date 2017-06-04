@@ -1,3 +1,5 @@
+# Introduction
+
 This project was used in a 
 [Statistics Enrichment Camp](http://www.stat.nus.edu.sg/opencms/events/outreach/camp.html) at NUS in June 2017. The participants were from various secondary schools and junior colleges in Singapore. 
 
@@ -11,19 +13,17 @@ For my activity, I intended to show them some of the considerations that a stati
 
 4. Here is a [document](https://docs.google.com/document/d/1GG4-HKs0Lp4WevmfJyn8LojNKCEOp6sCupmX1RNBNcQ/edit?usp=sharing) that describes what happened. It can be used to brief the students just prior to the testing.
 
-The overall purpose was to demonstrate 
+5. A debriefing was conducted using the following slides.
 
-This project was created to store the source code to record heartbeat through an Arduino. 
-The device was then used as part of an activity to 
-demonstrate the tasks that a statistician has to perform in order to be 
-a good one.
-
-# Data capture device
+# Arduino set-up
 
 ## Electronic components used
 
 1. Arduino Uno
 2. Seeed Grove heart rate sensor
+3. 3 x LEDs
+4. Jumper cables/leads
+5. 4 resistors
 
 ### Software used ###
 
