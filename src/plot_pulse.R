@@ -23,7 +23,7 @@ pulses[-1,] %>% mutate(pulse0 = pulse - pulse[1]) %>%
 
 #####################
 
-pulses <- read.csv("testing_output2.txt", header=FALSE,
+pulses <- read.csv("testing_output_music.txt", header=FALSE,
                    col.names = "pulse", stringsAsFactors = FALSE) %>% 
   as_tibble()
 
@@ -41,4 +41,4 @@ pulses[-1,] %>% mutate(pulse0 = pulse - pulse[1]) %>%
 pulses[-1,] %>% mutate(pulse0 = pulse - pulse[1]) %>%
   filter(pulse0 <= 180000) %>% 
   mutate(pulse_diff = pulse0 - lag(pulse0)) %>%
-  mutate(bpm = 60000/pulse_diff) -> tmp_before
+  mutate(bpm = 60000/pulse_diff) -> tmp_music
