@@ -8,7 +8,16 @@ output: html_document
 ```{r load_libraries, message=FALSE, warning=FALSE}
 library(RHRV)
 library(tidyverse)
-path       = "."
+
+create_nihr <- function(fname) {
+  obj <- CreateHRVData()
+  vec1 <- read.table(fname)[,1]
+  vec1 <- vec1 - vec1[1]
+  obj <- LoadBeatVector(obj, vec1, scale = 0.001)
+  obj <- BuildNIHR(obj)
+  obj <- SetVerbose(obj, TRUE)
+  obj
+}
 ```
 
 ## Template plots and analysis
@@ -25,20 +34,29 @@ correlation drops back to zero?
 
 ```{r}
 # Load baseline
-base_hr <- CreateHRVData()
-base_hr <- LoadBeatAscii(base_hr, "baseline.txt", RecordPath=path, scale=0.001)
-base_hr <- BuildNIHR(base_hr)
+base_hr <- create_nihr("baseline.txt")
+base2 <- FilterNIHR(base_hr)
 PlotNIHR(base_hr)
 #hr = FilterNIHR(hr)
 
-ex_hr <- CreateHRVData()
-ex_hr <-  LoadBeatAscii(ex_hr, "after_exercise.txt", RecordPath=path, scale=0.001)
-ex_hr <- BuildNIHR(ex_hr)
+ex_hr <- create_nihr("after_exercise.txt")
 PlotNIHR(ex_hr)
 
-music_hr <-  CreateHRVData()
-music_hr <-  LoadBeatAscii(music_hr, "during_music.txt", RecordPath=path, scale=0.001)
-music_hr <-  BuildNIHR(music_hr)
-PlotNIHR(music_hr)
+music_hr <-  create_nihr("during_music.txt")
+music2 <- FilterNIHR(music_hr)
+PlotNIHR(music2)
+```
+
+## Overlay Two HR series
+
+```{r}
+ex2 <- FilterNIHR(ex_hr)
+PlotNIHR(ex2, col="red")
+lines(base2$Beat$Time, base2$Beat$niHR, col="gray")
+```
+
+## Display Baseline with Mean and SD
+```{r}
+ex2 <- CreateTimeAnalysis(ex2, size=15)
 ```
 
