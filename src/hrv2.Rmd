@@ -1,0 +1,44 @@
+---
+title: "hrv2"
+author: "Vik Gopal"
+date: "14 May 2019"
+output: html_document
+---
+
+```{r load_libraries, message=FALSE, warning=FALSE}
+library(RHRV)
+library(tidyverse)
+path       = "."
+```
+
+## Template plots and analysis
+
+* Read in baseline, exercise and music hrs
+* Overlay them (requires zero-ing of time)
+    * Display standard errors, outliers, summaries, smooths
+* Function to detect return to baseline
+* Can we use Poincare plot to detect episodes? Can we use the point at which
+correlation drops back to zero?
+* Work on storing hr objects in a tibble or data frame.
+
+## Read in files
+
+```{r}
+# Load baseline
+base_hr <- CreateHRVData()
+base_hr <- LoadBeatAscii(base_hr, "baseline.txt", RecordPath=path, scale=0.001)
+base_hr <- BuildNIHR(base_hr)
+PlotNIHR(base_hr)
+#hr = FilterNIHR(hr)
+
+ex_hr <- CreateHRVData()
+ex_hr <-  LoadBeatAscii(ex_hr, "after_exercise.txt", RecordPath=path, scale=0.001)
+ex_hr <- BuildNIHR(ex_hr)
+PlotNIHR(ex_hr)
+
+music_hr <-  CreateHRVData()
+music_hr <-  LoadBeatAscii(music_hr, "during_music.txt", RecordPath=path, scale=0.001)
+music_hr <-  BuildNIHR(music_hr)
+PlotNIHR(music_hr)
+```
+
