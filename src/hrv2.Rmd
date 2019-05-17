@@ -26,6 +26,9 @@ create_nihr <- function(fname) {
 * Overlay them (requires zero-ing of time)
     * Display standard errors, outliers, summaries, smooths
 * Function to detect return to baseline
+    * find first 15 sec window where HR is within limits (??)
+    * fit a piecewise linear regression to identify changepoint
+    * Poincare plot
 * Can we use Poincare plot to detect episodes? Can we use the point at which
 correlation drops back to zero?
 * Work on storing hr objects in a tibble or data frame.
@@ -33,11 +36,9 @@ correlation drops back to zero?
 ## Read in files
 
 ```{r}
-# Load baseline
+# Load and plot baseline
 base_hr <- create_nihr("baseline.txt")
 base2 <- FilterNIHR(base_hr)
-PlotNIHR(base_hr)
-#hr = FilterNIHR(hr)
 
 ex_hr <- create_nihr("after_exercise.txt")
 PlotNIHR(ex_hr)
@@ -56,7 +57,53 @@ lines(base2$Beat$Time, base2$Beat$niHR, col="gray")
 ```
 
 ## Display Baseline with Mean and SD
+
+This displays the baseline HR (interpolated), along with the 2-sd (95%) 
+interval.
 ```{r}
-ex2 <- CreateTimeAnalysis(ex2, size=15)
+base2 <- InterpolateNIHR(base2)
+UL <- mean(base2$HR) + 1.96*sd(base2$HR)
+LL <- mean(base2$HR) - 1.96*sd(base2$HR)
+PlotHR(base2)
+abline(h=c(UL, LL), col="red", lty=2)
 ```
+
+Now we try to show the exercise related HR, along with the limits for the 
+baseline.
+```{r}
+ex2 <- InterpolateNIHR(ex2)
+PlotHR(ex2, col="red")
+abline(h=c(UL, LL), col="blue", lty=2)
+```
+
+## Poincare plot and episodes
+
+```{r}
+base2 <- CreateNonLinearAnalysis(base2)
+PoincarePlot(base2, doPlot = TRUE)
+
+ex2 <- CreateNonLinearAnalysis(ex2)
+PoincarePlot(ex2, doPlot = TRUE)
+```
+
+## Create and display episodes
+
+```{r}
+ex3 <- AddEpisodes(ex2, InitTimes = c(0, 50), Duration=c(50, 130), 
+                   Tags=c("recovery", "recovered"), Values=c(0,0))
+PlotHR(ex3, Tags="all")
+```
+
+What kind rules can we introduce to discuss change-point detection?
+
+## Functions to detect return to baseline
+
+### First method
+```{r}
+detect1 <- function(base_obj, ex_obj) {
+  print("pass for now")
+}
+```
+
+
 
