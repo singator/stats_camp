@@ -80,10 +80,10 @@ abline(h=c(UL, LL), col="blue", lty=2)
 
 ```{r}
 base2 <- CreateNonLinearAnalysis(base2)
-PoincarePlot(base2, doPlot = TRUE)
+#PoincarePlot(base2, doPlot = TRUE)
 
 ex2 <- CreateNonLinearAnalysis(ex2)
-PoincarePlot(ex2, doPlot = TRUE)
+#PoincarePlot(ex2, doPlot = TRUE)
 ```
 
 ## Create and display episodes
@@ -105,5 +105,25 @@ detect1 <- function(base_obj, ex_obj) {
 }
 ```
 
+## Create tibble with the different data
+
+```{r}
+all_data <- tribble( 
+  ~rhrv, ~gender, ~ht, ~wt, ~id, ~activity,
+  ex3, "M", 1.78, 69, "vik", "exercise",
+  base2, "M", 1.78, 69, "vik", "baseline")
+
+## To add another row
+tmp_data <- tribble( 
+  ~rhrv, ~gender, ~ht, ~wt, ~id, ~activity,
+  base2, "F", 1.78, 69, "celia", "exercise")
+all_data <- rbind(all_data, tmp_data)
+```
+
+In order to plot from the data frame, we can use code like this one:
+```{r}
+filter(all_data, id == "vik", activity == "baseline") %>% 
+  {PlotHR(.$rhrv[[1]])}
+```
 
 
