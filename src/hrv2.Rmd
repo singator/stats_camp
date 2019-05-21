@@ -105,7 +105,57 @@ detect1 <- function(base_obj, ex_obj) {
 }
 ```
 
-## Create tibble with the different data
+```{r}
+roll_check_single <- function(vec, ii, LL, UL, window=20) {
+  if(ii < window) {
+    return(NA)
+  }
+  #  stop("index ii has to be at least window size")
+  if(ii > length(vec))
+    stop("index ii should be at most the length of the vector")
+  tmp <- vec[(ii-window+1):ii]
+  tmp_id <- sum(tmp > UL | tmp < LL)
+  sum(tmp_id)
+}
+vec1 <- ex3$HR # interpolated HR
+OOC <- sapply(1:length(vec1), roll_check_single, vec=vec1, LL=LL, UL=UL, 
+              window = 20)
+min(which(OOC <= 1))
+```
+
+## Second method
+
+```{r}
+f_lm <- function(y, id, tau) {
+  x <- ifelse(id <= tau, id, tau)
+  lm1 <- lm(y ~ x)
+  r2 <- summary(lm1)$r.squared
+  r2
+}
+
+detect2 <- function(ex_obj, base_obj=NULL) {
+  # base_obj unused here.
+  y <- ex_obj$HR
+  id <- 1:length(y)
+  
+  tau_vals <- id[20:length(id)]
+  r2_vals <- sapply(tau_vals, f_lm, y=y, id=id)
+  best_fit <- tau_vals[which.max(r2_vals)]
+  best_fit # Remember to divide by 4 here
+}
+# detect2(ex3)
+
+
+# PlotHR(ex2)
+# x_ <- 1:tau/4
+# lines(x_, beta_coef[1] + (1:tau)*beta_coef[2], col='red', lty=2)
+# x_ <- (tau+1):id[length(id)]/4
+# lines(x_, rep(beta_coef[1]+tau*beta_coef[2], length.out = length(x_)), 
+#       col="red", lty=2)
+```
+
+
+## Create tibble with the different datasets
 
 ```{r}
 all_data <- tribble( 
