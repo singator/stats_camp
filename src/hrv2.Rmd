@@ -9,6 +9,7 @@ output: html_document
 library(RHRV)
 library(tidyverse)
 
+# Creates rhrv object, without removing outliers, before interpolation
 create_nihr <- function(fname) {
   obj <- CreateHRVData()
   vec1 <- read.table(fname)[,1]
