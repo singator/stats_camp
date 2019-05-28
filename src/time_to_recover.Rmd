@@ -1,0 +1,120 @@
+---
+title: "Time To Recover"
+author: "Vik Gopal"
+date: "28 May 2019"
+output: html_document
+---
+
+```{r load_libraries, message=FALSE, warning=FALSE}
+library(RHRV)
+library(tidyverse)
+
+# Creates rhrv object, without removing outliers, before interpolation
+create_nihr <- function(fname) {
+  obj <- CreateHRVData()
+  vec1 <- read.table(fname)[,1]
+  vec1 <- vec1 - vec1[1]
+  obj <- LoadBeatVector(obj, vec1, scale = 0.001)
+  obj <- BuildNIHR(obj)
+  obj <- SetVerbose(obj, TRUE)
+  obj
+}
+
+#### Using QC control technique
+roll_check_single <- function(vec, ii, LL, UL, window=20) {
+  if(ii < window) {
+    return(NA)
+  }
+  #  stop("index ii has to be at least window size")
+  if(ii > length(vec))
+    stop("index ii should be at most the length of the vector")
+  tmp <- vec[(ii-window+1):ii]
+  tmp_id <- sum(tmp > UL | tmp < LL)
+  sum(tmp_id)
+}
+#vec1 <- ex3$HR # interpolated HR
+#OOC <- sapply(1:length(vec1), roll_check_single, vec=vec1, LL=LL, UL=UL, 
+#              window = 20)
+#min(which(OOC <= 1))
+
+detect1 <- function(objs, trts, plot=FALSE) {
+  b <- which(trts == "baseline")
+  ex <- which(trts == "after_exercise")
+  
+  ex_obj <- objs[[ex]]
+  base_obj <- objs[[b]]
+  
+  UL <- mean(base_obj$HR) + 1.96*sd(base_obj$HR)
+  LL <- mean(base_obj$HR) - 1.96*sd(base_obj$HR)
+  
+  vec1 <- ex_obj$HR
+  OOC <- sapply(1:length(vec1), roll_check_single, vec=vec1, LL=LL, 
+                UL=UL, window = 20)
+  id <- min(which(OOC <= 1))
+  
+  if(plot) {
+    PlotHR(ex_obj)
+    abline(v=id/4, lty=2, col="red")
+  }
+  id/4
+}
+
+#### Using Piecewise linear regression
+f_lm <- function(y, id, tau) {
+  x <- ifelse(id <= tau, id, tau)
+  lm1 <- lm(y ~ x)
+  r2 <- summary(lm1)$r.squared
+  r2
+}
+
+detect2 <- function(objs, trts, plot=FALSE) {
+  b <- which(trts == "baseline")
+  ex <- which(trts == "after_exercise")
+  
+  ex_obj <- objs[[ex]]
+  base_obj <- objs[[b]]
+  
+  # base_obj unused here.
+  y <- ex_obj$HR
+  id <- 1:length(y)
+  
+  tau_vals <- id[20:length(id)]
+  r2_vals <- sapply(tau_vals, f_lm, y=y, id=id)
+  best_fit <- tau_vals[which.max(r2_vals)]
+  if(plot) {
+    PlotHR(ex_obj)
+    abline(v=best_fit/4, lty=2, col="red")
+  }
+  best_fit/4 # In seconds
+}
+```
+
+## Read in Master data 
+```{r message=FALSE}
+master_data <- readRDS("../data_upload/master_data.rds")
+only_ex_base <- dplyr::filter(master_data, 
+                              trt %in% c("baseline", "after_exercise") )
+only_ex_base$rhrv2 <- lapply(only_ex_base$rhrv, 
+                             function(x) InterpolateNIHR(FilterNIHR(x)))
+```
+
+## Count of Person Id 
+
+```{r}
+group_by(only_ex_base, pid) %>% count()
+```
+
+### Plot one of them
+
+```{r}
+filter(only_ex_base, pid == "vik") %>% {detect1(.$rhrv2, .$trt, plot=TRUE)}
+#filter(only_ex_base, pid == "cc") %>% {detect1(.$rhrv2, .$trt, plot=TRUE)}
+```
+
+## Compute Time to Recover
+```{r message=FALSE}
+group_by(only_ex_base, pid) %>% summarise(ttr1 = detect1(rhrv2, trt), 
+                                          ttr2 = detect2(rhrv2, trt))
+
+```
+
