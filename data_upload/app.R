@@ -82,8 +82,6 @@ server <- function(input, output) {
      input$upload
      isolate(
      if(is.null(rhrv_obj())) {
-       #dist <- rnorm(100)
-       #hist(dist)
        return(NULL)
      } else {
        PlotNIHR(rhrv_obj())
