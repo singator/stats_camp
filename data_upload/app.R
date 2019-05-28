@@ -52,7 +52,7 @@ ui <- fluidPage(
    fluidRow(
      column(width=6,  fileInput("file1", "Text file")),
      column(width=6, selectInput("treatment", "Treatment",
-                                 choices=c("baseline", "after_stairs",
+                                 choices=c("baseline", "after_exercise",
                                            "watching_sports", 
                                            "listening_music", "doing_math")))
    ),
@@ -63,7 +63,10 @@ ui <- fluidPage(
    hr(),
    fluidRow(
      column(width=6, plotOutput('plot1')),
-     column(width=6, textOutput('text1'))
+     column(width=6, plotOutput('plot2'))
+   ),
+   fluidRow(
+     column(width=8,  textOutput('text1'))
    )
 )
 
@@ -78,15 +81,99 @@ server <- function(input, output) {
     rhrv_obj
   })
   
-   output$plot1 <- renderPlot({
-     input$upload
-     isolate(
-     if(is.null(rhrv_obj())) {
-       return(NULL)
+   # output$plot1 <- renderPlot({
+   #   input$upload
+   #   isolate(
+   #   if(is.null(rhrv_obj())) {
+   #     return(NULL)
+   #   } else {
+   #     PlotNIHR(rhrv_obj())
+   #   })
+   # })
+   
+   observeEvent(input$upload, {
+     # check for log file
+     time_now <- as.character(Sys.time())
+     log_string <- paste(time_now, "Uploading",
+                         input$height, 
+                         input$weight, input$gender,
+                         input$person_id, 
+                         input$dev_id, 
+                         input$treatment, sep=",")
+     
+     # update master data file.
+     tmp_data <- tribble( 
+       ~rhrv, ~gender, ~ht, ~wt, ~pid,  ~did, ~trt, 
+       rhrv_obj(), input$gender, as.numeric(input$height), 
+       as.numeric(input$weight), input$person_id, input$dev_id, 
+       input$treatment)
+     data_exists <- file.exists("master_data.rds")
+     if(data_exists) {
+       master_data <- readRDS("master_data.rds")
+       tmp_j <- semi_join(master_data, tmp_data, 
+                          by=c("gender", "ht", "wt", "pid", "did", "trt"))
+       if(nrow(tmp_j) != 0) {
+         master_data <- anti_join(master_data, tmp_data, 
+                          by=c("gender", "ht", "wt", "pid", "did", "trt"))
+         log_string <- paste0(log_string, "(overwrite) \n")
+       } else {
+         log_string <- paste0(log_string, "\n")
+       }
      } else {
-       PlotNIHR(rhrv_obj())
-     })
+       master_data <- NULL
+       log_string <- paste0(log_string, "\n")
+     }
+     
+     master_data <- rbind(master_data, tmp_data)
+     saveRDS(master_data, "master_data.rds")
+     cat(log_string, file="camp.log", append=TRUE)
+     
+     if(input$treatment == "baseline") {
+       rhrv_f <- FilterNIHR(rhrv_obj())
+       rhrv_i <- InterpolateNIHR(rhrv_f)
+       mm <- mean(rhrv_i$HR)
+       UL <- mm + 1.96*sd(rhrv_i$HR)
+       LL <- mm - 1.96*sd(rhrv_i$HR)
+       output$plot1 <- renderPlot({
+         isolate({
+           PlotNIHR(rhrv_obj(), main="Raw")
+         })
+       })
+       output$plot2 <- renderPlot({
+         PlotHR(rhrv_i, main="Processed")
+         abline(h=c(UL, mm, LL), col=c("red", "blue", "red"), lty=2)
+       })
+       log_string <- paste(log_string, 
+                            "mean: ", as.integer(mm),
+                            ",UL: ", as.integer(UL), 
+                            ",LL: ", as.integer(LL), sep=",")
+     } else {
+       rhrv_f <- FilterNIHR(rhrv_obj())
+       rhrv_i <- InterpolateNIHR(rhrv_f)
+       output$plot1 <- renderPlot({
+         isolate({
+           PlotNIHR(rhrv_obj(), main="Raw")
+         })
+       })
+       
+       tmp <- dplyr::filter(master_data, gender==input$gender,
+                    ht == as.numeric(input$height), 
+                    wt  == as.numeric(input$weight), 
+                    pid == input$person_id, did == input$dev_id,
+                    trt == "baseline")
+       output$plot2 <- renderPlot({
+         PlotHR(rhrv_i, main="Processed", col="red")
+         if(nrow(tmp) != 0){
+           tmp2 <- FilterNIHR(tmp$rhrv[[1]])
+           lines(tmp2$Beat$Time, tmp2$Beat$niHR, col="gray")
+         }
+       })
+       
+     }
+     
+     output$text1 <- renderText({ log_string })
    })
+
 }
 
 # Run the application 

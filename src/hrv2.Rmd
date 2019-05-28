@@ -38,13 +38,13 @@ correlation drops back to zero?
 
 ```{r}
 # Load and plot baseline
-base_hr <- create_nihr("baseline.txt")
+base_hr <- create_nihr("../src/baseline.txt")
 base2 <- FilterNIHR(base_hr)
 
-ex_hr <- create_nihr("after_exercise.txt")
+ex_hr <- create_nihr("../src/after_exercise.txt")
 PlotNIHR(ex_hr)
 
-music_hr <-  create_nihr("during_music.txt")
+music_hr <-  create_nihr("../src/during_music.txt")
 music2 <- FilterNIHR(music_hr)
 PlotNIHR(music2)
 ```
@@ -101,12 +101,6 @@ What kind rules can we introduce to discuss change-point detection?
 
 ### First method
 ```{r}
-detect1 <- function(base_obj, ex_obj) {
-  print("pass for now")
-}
-```
-
-```{r}
 roll_check_single <- function(vec, ii, LL, UL, window=20) {
   if(ii < window) {
     return(NA)
@@ -118,10 +112,32 @@ roll_check_single <- function(vec, ii, LL, UL, window=20) {
   tmp_id <- sum(tmp > UL | tmp < LL)
   sum(tmp_id)
 }
-vec1 <- ex3$HR # interpolated HR
-OOC <- sapply(1:length(vec1), roll_check_single, vec=vec1, LL=LL, UL=UL, 
-              window = 20)
-min(which(OOC <= 1))
+#vec1 <- ex3$HR # interpolated HR
+#OOC <- sapply(1:length(vec1), roll_check_single, vec=vec1, LL=LL, UL=UL, 
+#              window = 20)
+#min(which(OOC <= 1))
+
+detect1 <- function(objs, trts, plot=FALSE) {
+  b <- which(trts == "baseline")
+  ex <- which(trts == "after_exercise")
+  
+  ex_obj <- objs[[ex]]
+  base_obj <- objs[[b]]
+  
+  UL <- mean(base_obj$HR) + 1.96*sd(base_obj$HR)
+  LL <- mean(base_obj$HR) - 1.96*sd(base_obj$HR)
+  
+  vec1 <- ex_obj$HR
+  OOC <- sapply(1:length(vec1), roll_check_single, vec=vec1, LL=LL, 
+                UL=UL, window = 20)
+  id <- min(which(OOC <= 1))
+  
+  if(plot) {
+    PlotHR(ex_obj)
+    abline(v=id/4, lty=2, col="red")
+  }
+  id/4
+}
 ```
 
 ## Second method
@@ -134,7 +150,13 @@ f_lm <- function(y, id, tau) {
   r2
 }
 
-detect2 <- function(ex_obj, base_obj=NULL) {
+detect2 <- function(objs, trts, plot=FALSE) {
+  b <- which(trts == "baseline")
+  ex <- which(trts == "after_exercise")
+  
+  ex_obj <- objs[[ex]]
+  base_obj <- objs[[b]]
+  
   # base_obj unused here.
   y <- ex_obj$HR
   id <- 1:length(y)
@@ -142,9 +164,13 @@ detect2 <- function(ex_obj, base_obj=NULL) {
   tau_vals <- id[20:length(id)]
   r2_vals <- sapply(tau_vals, f_lm, y=y, id=id)
   best_fit <- tau_vals[which.max(r2_vals)]
-  best_fit # Remember to divide by 4 here
+  if(plot) {
+    PlotHR(ex_obj)
+    abline(v=best_fit/4, lty=2, col="red")
+  }
+  best_fit/4 # In seconds
 }
-# detect2(ex3)
+ detect2(ex3)
 
 
 # PlotHR(ex2)
