@@ -1,8 +1,73 @@
 ---
-title: "test"
-author: "Vik Gopal"
-date: "29 May 2019"
+title: "Instructions/Worksheet"
+author: "NUS Statistics Enrichment Camp"
+date: "07 Jun 2019"
 output: html_document
 ---
 
-## Test
+# Goals
+
+In this exercise, we shall try to address the following questions by collecting 
+data on ourselves:
+
+1. Does resting heart rate differ according to gender, height and weight?
+2. How much is heart rate affected by 
+    * watching exciting sports?
+    * working on a math problem?
+3. How long does it take our heart rate to recover after moderate physical 
+activity?
+
+As you proceed through the activity, think about each step you are doing. The 
+following questions may be interesting to ask at each stage:
+
+* Why are we using *this* tool/program?
+* What do I expect to see happen?
+* What can I conclude from this output? Is the conclusion clear cut? Did I 
+overlook any possibilities?
+
+# Setting Up
+
+At any point, if you need help, please raise your hand.
+
+## Downloading What You Need
+
+1. Log in to the PC in front of you. The user name (do not leave out the period and 
+the backslash) and password are:
+```
+username:  .\statuser
+password:  4ever!2much4me
+```
+2. Open up Internet Explorer, and go to this address:
+```
+http://sta93.stat.nus.edu.sg/stats_camp.zip
+```
+3. Extract the zipped file on to the Desktop. You should now have a folder 
+containing the following items:
+    1. hr2b.ino - a file to be loaded onto the Arduino.
+    2. data_capture.ipynb - a Python notebook for data capture.
+    3. stats_camp.mp4 - a video.
+    4. math_problem.pdf - a mathematics problem for you to solve.
+
+## Arduino
+
+1. Make sure each pair of participants has the following items:
+    * 1 x Arduino UNO
+    * 1 x USB cable
+    * 3 x male-male jumper cables
+    * 1 x Heart rate sensor
+2. Connect the Heart-rate sensor to the Arduino according to the following
+diagram. The red cable should connect the the 5V power, black to the Ground pin,
+and the yellow cable to PIN 2 on the right.
+![](../arduino_setup_yr19.png)
+3. Connect the Arduino to one of the USB ports on the PC, and then double-click 
+on the `hr2b.ino` program to open the Arduino IDE.
+4. Once it is open, go to Tools > Port and select the COM port that your Arduino 
+Uno is connected to. Write it down (e.g. COM4, or COM5 etc.) somewhere to 
+remember it.
+5. 
+
+
+
+# Data Capture
+
+# Uploading
