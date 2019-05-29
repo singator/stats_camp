@@ -3,8 +3,10 @@ title: "Instructions/Worksheet"
 author: "NUS Statistics Enrichment Camp"
 date: "07 Jun 2019"
 output:
+  pdf_document: 
+    keep_tex: yes
+    number_sections: yes
   html_document: default
-  pdf_document: default
 ---
 
 # Goals
