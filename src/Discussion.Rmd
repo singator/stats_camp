@@ -1,0 +1,103 @@
+---
+title: "Discussion"
+author: "Vik"
+date: "5/30/2019"
+output: 
+  pdf_document: 
+    number_sections: yes
+---
+
+# Tools
+
+## Arduino
+
+An Arduino contains a processor, with several pin-outs for connecting sensors.
+
+It does not have a lot of memory. It does not have a disk for storage at all. 
+All it does is run a loop several times per second. In our code, it waits for an 
+interrupt signal (your heartbeat) at which point it sends a message to the PC. 
+The message it sends is the number of milliseconds since the Arduino was 
+connected.
+
+The communication is very primitive (it mimics a serial port connection through
+the USB). It basically sends a string of 1's and 0's that are grouped into bytes
+and interpreted as characters. 
+
+Arduinos and raspberry Pis enable us to collect a great deal more data than we 
+could before. Their respective websites are useful resources for learning about 
+them. You can buy them online from sgbotic.com
+
+Why didn't we just use an app on our phone?
+
+## Python
+
+Python is a very popular programming language. It is easy to pick up. It is 
+fast. It contains very good libraries for machine learning. Here, we only used 
+it for the serial port communication.
+
+A Jupyter notebook is a very widely used tool for programming in Python. As you 
+can see, it allows us to combine code and text in one document that can be 
+easily shared.
+
+You can learn more Python from the official Python website, or from DataCamp.
+
+## R 
+
+R is a statisical computing language. It is similar to Python. It creates 
+excellent graphics, and has an incredible number of libraries that contain
+statistical routines. It is superb for data manipulation, mainly due to the 
+dplyr package.
+
+We used it for the server programs for uploading your text files.
+
+We also used an R package (RHRV) for the heartbeat analysis. The functions here 
+enabled us to remove the outliers that you observed. They also created the 
+simple plots that we saw every time we uploaded a file.
+
+You can learn more R from the official R website, or from DataCamp.
+
+# Statistics
+
+## Outliers
+
+In our activity, we collected the raw data. However, as you observed, there were
+mistakes. 
+
+## Confidence Intervals
+
+When you uploaded the baseline, you would have seen a plot with three lines, 
+2 red and one blue. This is a 95% confidence interval. We expect the heart rate 
+to be within these limits 95% of the time. It provides more information than 
+just the mean alone.
+
+## Changepoints
+
+We computed changepoints in a couple of ways:
+
+1. We used a technique from quality control. We monitored 5 second windows 
+until the first one where there was at most one out-of-control observations. A 
+reading was out of control if it fell outside the 95% confidence interval.
+2. We fitted a piecewise continuous regression line, and optimised the $R^2$.
+
+How many other ways can you think of?
+
+# The Team
+
+1. Data collection
+2. Data validation, cleaning
+3. Data exploration, visualisation
+4. Software engineers
+5. Theoretical statisticians
+6. Managers
+
+
+# Summary Points
+
+1. Can you trust your data? How can I collect my own data?
+2. What tools/devices/programs do I need to write/adapt?
+3. Are there outliers in your data? How should you deal with them?
+4. Statistics is about making comparisons. How can I make a valid one?
+5. How can I measure an attribute? Is there a proxy for what I want? Is this 
+reliable? When will it fail?
+6. What can I conclude? Can I generalise it to another population?
+7. What decision can I make based on this result?

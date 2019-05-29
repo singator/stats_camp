@@ -1,0 +1,44 @@
+---
+title: "Logistics"
+author: "Vik"
+date: "5/29/2019"
+output: html_document
+---
+
+# Team Members
+
+1. Vik
+2. Willem
+3. Hui Qi
+4. Joseph
+5. Carine
+6. Li Juan
+7. Shaomin
+
+# Rooms and Teams
+
+Lab 1 (30 students, 2 facilitators)
+Lab 2 (30 students, 2 facilitators)
+Lab 4 (28 students, 2 facilitators)
+
+1 team member will be a roving member, monitoring data uploads
+
+# Time-table
+
+Whole activity is scheduled for 2 hours, from 13:30 to 15:30. We will probably 
+take 15 - 30 minutes longer. Here is a targeted breakdown.
+
+* Students pre-assigned to pairs and labs before they register (indicated on the 
+packet).
+* Before they disperse for lunch, I will make a short announcement describing  
+the activity. I will identify a room IC (one per room). The students will meet 
+outside LT31 at 13:20, where the room IC will bring them up. (1320)
+* Equipment should be laid out per pair of PCs before this (during lunch). PCs 
+should be turned on by now.
+* Room IC should give a brief description of what to do. Activity begins (1335).
+Set up of Arduinos, Jupyter notebooks should be done by 1400. 
+* Data collection (4 x 3 x 2 + buffer = 45 minutes). Data collection should be done 
+by 1445. Participants dismantle equipment and return to LT.
+* We process results, create a few plots and summaries. 
+* Discuss from 1500 to 1530.
+* Dismiss.
