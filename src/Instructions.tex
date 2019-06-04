@@ -134,46 +134,25 @@ doing. The following questions may be interesting to ask at each stage:
 At any point, if you need help, please raise your hand.
 
 \hypertarget{downloading-what-you-need}{%
-\subsection{Downloading What You Need}\label{downloading-what-you-need}}
+\subsection{Programs That You Need}\label{downloading-what-you-need}}
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   Log in to the PC in front of you. The user name (do not leave out the
-  period and the backslash) and password are:
-\end{enumerate}
-
-\begin{verbatim}
-username:  .\statuser
-password:  4ever!2much4me
-\end{verbatim}
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\setcounter{enumi}{1}
-\tightlist
+  period and the backslash) and password are given on the whiteboard in front
+of you.
 \item
-  Open up Internet Explorer, and go to this address:
-\end{enumerate}
-
-\begin{verbatim}
-http://sta93.stat.nus.edu.sg/stats_camp.zip
-\end{verbatim}
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\setcounter{enumi}{2}
-\tightlist
+  All the files you need are inside a folder, on the Desktop, entitled
+``stats\_camp'.
 \item
-  Extract the zipped file on to the Desktop. You should now have a
-  folder containing the following items:
-
+  Open up the folder. It should contain the following items:
   \begin{enumerate}
   \def\labelenumii{\arabic{enumii}.}
   \tightlist
   \item
-    hr2b.ino - a file to be loaded onto the Arduino.
+    hr2b.ino - a file that is been loaded onto the Arduino.
   \item
     data\_capture.ipynb - a Python notebook for data capture.
   \item
@@ -188,8 +167,7 @@ http://sta93.stat.nus.edu.sg/stats_camp.zip
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  Make sure that you and your partner have the following items:
-
+  Make sure that you and your teams have the following items:
   \begin{itemize}
   \tightlist
   \item
@@ -210,6 +188,7 @@ http://sta93.stat.nus.edu.sg/stats_camp.zip
   \includegraphics[width=0.5\textwidth]{../arduino_setup_yr19.png}
   \end{center}
   \end{figure}
+  If you aren't sure, ask for help.
 \item
   Connect the Arduino to one of the USB ports on the PC, and then
   double-click on the \texttt{hr2b.ino} program to open the Arduino IDE.
@@ -218,21 +197,17 @@ http://sta93.stat.nus.edu.sg/stats_camp.zip
   COM port that your Arduino Uno is connected to. Write it down
   (e.g.~COM4, or COM5 etc.) somewhere to remember it.
 \item
-  Click on the Upload button (the arrow pointing to the right) to upload
-  the program onto the Arduino. If you any error messages in the console
-  below, alert the trainer in your room.
-\item
-  Clip the sensor onto the index finger on your non-master hand, and
-  remain still. Ask your partner to click on the magnifying glass icon
-  on the top right of the Arduino program. You should see a new window
-  pop up, with a number being printed continually. An LED on the Arduino
-  should also turn on each time this happens.
+  Clip the sensor onto the index finger on your non-master hand, and remain
+  still. Ask one of your team to click on the magnifying glass icon on the top
+  right of the Arduino program. You should see a new window pop up, with a number
+  being printed continually. An LED on the Arduino should also blink each time
+  this happens.
 \end{enumerate}
 
 \pagebreak
 
 Take a look at the code in the Arduino window. What do you think it is
-doing?
+doing? What are the numbers being printed?
 
 \vspace{1.5em}
 \rule{16cm}{0.5pt}
@@ -261,19 +236,17 @@ Is the heart rate sensor working? How would you check?
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  Open Windows Explorer and navigate to the directory where you had
-  extracted the zip file.
+  Open up the ``stats\_camp'' folder that is on the Desktop.
 \item
-  Press Shift and Right-click within this window. A menu should pop-up.
-  One of the options should be ``Open Powershell here''. Click on that.
+  Press Shift and Right-click within this window (not on any particular file,
+  just in the empty space). A menu should pop-up.  One of the options should be
+  ``Open Powershell here''. Click on that.
 \item
   In the terminal that opens, type in
 \end{enumerate}
-
 \begin{verbatim}
 jupyter notebook
 \end{verbatim}
-
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \setcounter{enumi}{3}
@@ -285,7 +258,13 @@ jupyter notebook
 
 What you see now is called a Jupyter notebook. It consists of Python
 code, interspersed with comments and text. The code chunks are referred
-to as cells. To run a cell, use the up and down arrow keys to navigate
+to as cells. These are the sections that have the word 
+\begin{verbatim}
+In [6]: 
+\end{verbatim}
+on the left.
+
+To run a cell, use the up and down arrow keys to navigate
 to it, and then hit Ctrl-Enter.
 
 \begin{enumerate}
@@ -294,15 +273,29 @@ to it, and then hit Ctrl-Enter.
 \tightlist
 \item
   Run the first two cells now. You will not have to run these again
-  through-out the session.
+  through-out the session. These two cells import the relevant Python libraries
+  for communicating with the Arduino, and instantiate a progress bar.
 \item
-  Edit the line in the next cell (\textbf{Don't run the cell yet!}) to
+  The next cell specifies the port that the Arduino is connected to, and the
+  file to which you wish to save the data. The default filename that you see is
+  ``testing\_output\_after\_exercise.txt''.
+
+  Edit the lines in this cell (\textbf{Don't run the cell yet!}) to
   correspond to the COM port that you noted earlier. For instance, if it
   was COM5, then the line should be
 \end{enumerate}
 
 \begin{verbatim}
 ser = serial.Serial('COM5')
+\end{verbatim}
+  Also, change the filename to which you wish to save the first batch of data.
+  You will not have to change the COM port name for the rest of today, but you
+  will have to change the filename for each person and each activity for which
+  record the heart-rate. At this point, your cell might look like this:
+\begin{verbatim}
+In [8]: ser = serial.Serial('COM5')
+        f=open('john_baseline.txt', 'w')
+        total_time = 185
 \end{verbatim}
 
 \hypertarget{data-capture}{%
@@ -323,15 +316,18 @@ Every data capture phase consists of the following steps:
 \item
   Run the cell underneath the \emph{Start the capture} heading. This
   will begin the capture process. Each capture will take about 3
-  minutes; you should see a progress bar each time. Try to remain as
-  still as you can at this stage.
+  minutes; you should see a progress bar each time. Be as still as 
+  you can at this stage.
 \item
   Run the cell underneath the \emph{Close all connections} heading. This
   will complete one data capture phase. You should see the new file in
   your directory. Check that it is not empty.
 \end{enumerate}
 
-Each of you will capture data \emph{FOUR} times:
+If you encounter any errors, run the cell to close all connections, and then
+start again from the first stpe in this section.
+
+Today, each of you will capture data \emph{FOUR} times:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -345,7 +341,7 @@ https://youtu.be/K148UvqF5zk
 \end{verbatim}
 
 \item
-  Your heart rate while trying to solve a geometry problem. It's ok if
+  Your heart rate while trying to solve a mathematics problem. It's ok if
   you cannot solve it; just try your best. If you solve it within 3
   minutes, just relax and wait for it to finish.
 \item
@@ -373,23 +369,23 @@ http://sta93.stat.nus.edu.sg:8000/vik/data_upload
 \setcounter{enumi}{1}
 \tightlist
 \item
-  Fill up the entries accurately, select the appropriate activity and
-  hit Upload.
+  Make sure the files that were created are not empty before proceeding.
+  Fill up the entries on the page accurately, select the appropriate activity and
+  hit Upload, one file at a time.
 \item
   The device id can be found on a sticker on the back of the Arduino.
-  Please enter it in full, so it should be of the form ``Dxx''.
+  Please enter it in full, so it should be of the form ``Dxx''. If you are not
+  sure about your person id, check with the instructor.
 \item
-  Please ensure that you input your weight and height consistently. This
+  Please ensure that you input your weight (in kg) and height (in metres) 
+  consistently. This
   is important in order to match the entries. If you made any incorrect
-  entries, please inform one of the trainers.
+  entries, please inform one of the instructors.
 \item
   Please upload the files in the activity order listed above, person by
-  person.
-\end{enumerate}
-
-\hypertarget{pause-to-think}{%
-\section{Pause to Think}\label{pause-to-think}}
-
+  person. Take some time as you upload to think about the following:
+\begin{itemize}
+\item 
 When you uploaded the baseline file, what do the two entries show? What
 are the blue and red lines? What do you think is the difference between
 the two plots? Make a note of your average resting heart rate here.
@@ -403,6 +399,7 @@ the two plots? Make a note of your average resting heart rate here.
 \vspace{1.5em}
 \rule{16cm}{0.5pt}
 
+\item 
 When you uploaded the video and math files, what did you observe? Was
 there a difference between this and your resting heart rate?
 
@@ -415,6 +412,7 @@ there a difference between this and your resting heart rate?
 \vspace{1.5em}
 \rule{16cm}{0.5pt}
 
+\item 
 When you upload the exercise file, try to estimate the time it took to
 return to normal. Write down your recovery time (in seconds) here.
 
@@ -427,6 +425,7 @@ return to normal. Write down your recovery time (in seconds) here.
 \vspace{1.5em}
 \rule{16cm}{0.5pt}
 
+\item 
 Is it fair to use your personal guess as your recovery time? If not, how
 can we automate this detection? What rule would you use? What is good
 and what is bad about it?
@@ -439,5 +438,11 @@ and what is bad about it?
 
 \vspace{1.5em}
 \rule{16cm}{0.5pt}
+
+\end{itemize}
+
+\end{enumerate}
+
+
 
 \end{document}
