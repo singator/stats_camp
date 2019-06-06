@@ -24,19 +24,25 @@ dd <- readRDS("master_data.rds.2019-06-06-10-31")
 names2 <- read_excel("../Lab_Station_assignments.xlsx")
 ```
 
+
+```{r}
+dd <- left_join(dd, names2, by=c("pid" = "personID"))
+```
+
+
 ## Counts
 
 ### Count by Lab
 
 ```{r}
-dd <- left_join(dd, names2, by=c("pid" = "personID")) %>% 
+dd %>% 
   group_by(Lab) %>% count()
 ```
 
 ### Count by Person
 
 ```{r}
-dd <- left_join(dd, names2, by=c("pid" = "personID")) %>% 
+dd %>% 
   group_by(pid) %>% count()
 ```
 
@@ -83,12 +89,20 @@ dd_2 <- filter(dd, trt != "after_exercise")
 dd_2$rhrv2 <- lapply(dd_2$rhrv, function(x) InterpolateNIHR(FilterNIHR(x)))
 dd_2$mm <- sapply(dd_2$rhrv2, function(x) mean(x$HR))
 
-dd_2 %>% select(-rhrv, -rhrv2) %>% 
+dd_2 <- dd_2 %>% select(-rhrv, -rhrv2) %>% 
   spread(key=trt, value=mm) %>% 
-  mutate(d1 = watching_sports - baseline)
-#         d2 = doing_math - baseline)
+  mutate(d1 = watching_sports - baseline
+    #    , d2 = doing_math - baseline
+        )
+dd_2
 ```
 
+```{r}
+dd_tmp <- dd_2 %>% gather(key = trt, value = hr, d1, baseline)
+
+ggplot(dd_tmp) + 
+  geom_boxplot(aes(x=trt, y=hr))
+```
 
 
 
