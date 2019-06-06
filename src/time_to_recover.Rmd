@@ -91,11 +91,13 @@ detect2 <- function(objs, trts, plot=FALSE) {
 
 ## Read in Master data 
 ```{r message=FALSE}
-master_data <- readRDS("../data_upload/master_data.rds")
+master_data <- readRDS("master_data.rds.2019-06-06-10-31")
 only_ex_base <- dplyr::filter(master_data, 
                               trt %in% c("baseline", "after_exercise") )
 only_ex_base$rhrv2 <- lapply(only_ex_base$rhrv, 
                              function(x) InterpolateNIHR(FilterNIHR(x)))
+only_ex_base <- dplyr::filter(only_ex_base, did != "Willem") %>% 
+  dplyr::filter(ht < 2)
 ```
 
 ## Count of Person Id 
@@ -109,12 +111,12 @@ group_by(only_ex_base, pid) %>% count()
 ```{r}
 filter(only_ex_base, pid == "vik") %>% {detect1(.$rhrv2, .$trt, plot=TRUE)}
 #filter(only_ex_base, pid == "cc") %>% {detect1(.$rhrv2, .$trt, plot=TRUE)}
+filter(only_ex_base, pid == "Huiqi") %>% {detect1(.$rhrv2, .$trt, plot=TRUE)}
 ```
 
 ## Compute Time to Recover
 ```{r message=FALSE}
 group_by(only_ex_base, pid) %>% summarise(ttr1 = detect1(rhrv2, trt), 
                                           ttr2 = detect2(rhrv2, trt))
-
 ```
 

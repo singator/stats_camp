@@ -1,0 +1,94 @@
+---
+title: "Untitled"
+author: "Vik Gopal"
+date: "5 June 2019"
+output: html_document
+---
+```{r message=FALSE, echo=FALSE, warning=FALSE}
+library(tidyverse)
+library(readxl)
+library(RHRV)
+```
+
+
+## Run sync script
+
+```{r}
+source("sync_script.R")
+dd <- readRDS("master_data.rds.2019-06-06-10-31")
+```
+
+## Read in namelist
+
+```{r}
+names2 <- read_excel("../Lab_Station_assignments.xlsx")
+```
+
+## Counts
+
+### Count by Lab
+
+```{r}
+dd <- left_join(dd, names2, by=c("pid" = "personID")) %>% 
+  group_by(Lab) %>% count()
+```
+
+### Count by Person
+
+```{r}
+dd <- left_join(dd, names2, by=c("pid" = "personID")) %>% 
+  group_by(pid) %>% count()
+```
+
+## Get Baseline Mean
+
+```{r}
+dd_base <- filter(dd, trt == "baseline")
+dd_base$rhrv2 <- lapply(dd_base$rhrv, function(x) InterpolateNIHR(FilterNIHR(x)))
+dd_base$mm <- sapply(dd_base$rhrv2, function(x) mean(x$HR))
+dd_base$sd <- sapply(dd_base$rhrv2, function(x) sd(x$HR))
+```
+
+### Make Plots
+
+```{r}
+ggplot(dd_base) + 
+  geom_jitter(aes(x=wt, y=mm))
+
+ggplot(dd_base) + 
+  geom_jitter(aes(x=ht, y=mm))
+
+ggplot(dd_base) + 
+  geom_boxplot(aes(x=gender, y=mm))
+```
+
+## Within Person ID
+
+Does wt/ht/gender change within person ID?
+
+```{r}
+dd %>% select(wt, pid) %>% 
+  group_by(pid) %>% 
+  summarise(t_unique = n_distinct(wt))
+
+dd %>% select(ht, pid) %>% 
+  group_by(pid) %>% 
+  summarise(t_unique = n_distinct(ht))
+```
+
+### Comparing to Baseline
+
+```{r}
+dd_2 <- filter(dd, trt != "after_exercise")
+dd_2$rhrv2 <- lapply(dd_2$rhrv, function(x) InterpolateNIHR(FilterNIHR(x)))
+dd_2$mm <- sapply(dd_2$rhrv2, function(x) mean(x$HR))
+
+dd_2 %>% select(-rhrv, -rhrv2) %>% 
+  spread(key=trt, value=mm) %>% 
+  mutate(d1 = watching_sports - baseline)
+#         d2 = doing_math - baseline)
+```
+
+
+
+
