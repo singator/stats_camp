@@ -1,0 +1,199 @@
+---
+title: "Final Analysis"
+author: ""
+date: ""
+output: html_document
+---
+```{r message=FALSE, echo=FALSE, warning=FALSE}
+library(RHRV)
+library(tidyverse)
+library(readxl)
+```
+
+# Data Quality
+
+```{r echo=FALSE, warning=FALSE}
+master_data <- readRDS("master_data.rds.2019-06-08-00-01")
+master_data$id <- 1:nrow(master_data)
+features <- read_excel("master_data2.xlsx")
+dd <- left_join(features, select(master_data, rhrv, id), by="id") %>% 
+  mutate(ht = as.numeric(ht), wt=as.numeric(wt))
+```
+
+There were many data entry errors. Some were perhaps my own fault, for not 
+clarifying what to put as the Name. Others were surprising, for instance, 
+entries of 100kg and heights of 20000m. 
+
+We managed to obtain measurements from 62 individuals.
+
+# Baseline Measurements
+
+```{r echo=FALSE, message=FALSE, warnings=FALSE}
+base2 <- filter(dd, trt == "baseline")
+group_by(base2, gender) %>% count()
+```
+
+Try to obtain mean HR from interpolated object.
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+try_mean <- function(x) {
+  mm <- tryCatch(InterpolateNIHR(FilterNIHR(x)), error = function(e) return(NA))
+  if(class(mm) != "list"){
+    return(NA)
+  } else {
+    return(mean(mm$HR))
+  }
+}
+try_mean <- Vectorize(try_mean)
+base2 <- mutate(base2, mean_base = try_mean(rhrv))
+```
+
+## Compare Baseline Through Plots 
+
+```{r echo=FALSE, fig.align='center', warning=FALSE}
+filter(base2, !is.na(mean_base)) %>% 
+  ggplot() + geom_point(aes(x= wt, y= mean_base))
+```
+When we inspect the points where HR is close to 150 and below 50, we clearly 
+see something wrong with the heart rate sensor or the capture. Hence we will 
+remove those points from the next plot onwards.
+```{r echo=FALSE, fig.align='center', warning=FALSE}
+filter(base2, !is.na(mean_base), mean_base < 125, mean_base > 50) %>% 
+  ggplot() + geom_point(aes(x= ht, y= mean_base))
+```
+We try one more plot, of BMI, and we add in an indicator for gender.
+```{r echo=FALSE, fig.align='center', warning=FALSE}
+filter(base2, !is.na(mean_base), mean_base < 125, mean_base > 50,
+       !is.na(ht), !is.na(wt)) %>% 
+  mutate(bmi = wt/ht^2) %>% 
+  ggplot() + geom_jitter(aes(x= bmi, y= mean_base, col=gender))
+```
+There doesn't seem to be much association with gender/bmi.
+
+## Comparing Sports and Doing Math
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+base_sm <- filter(dd, trt != "after_exercise") %>% 
+  mutate(mean_hr  = try_mean(rhrv)) %>% 
+  filter(!is.na(mean_hr), mean_hr > 55, mean_hr < 140)
+```
+
+Spread the dataset and create a boxplot. If we had had time to obtain the full 
+data properly, we would have had more power to make a better comparison 
+(adjusting for individual), but we have too many individuals with only one 
+or the other.
+```{r echo=FALSE, fig.align='center', warning=FALSE, message=FALSE}
+select(base_sm, pid, trt, mean_hr) %>% 
+  unique() %>% 
+  spread(key=trt, value=mean_hr) %>% 
+  mutate(d1 = doing_math - baseline,
+         d2 = watching_sports - baseline) %>% 
+  select(pid, d1, d2) %>% 
+  gather(d1:d2, key=trt, value=difference) %>% 
+  ggplot() + geom_boxplot(aes(x=trt, y=difference)) + 
+    scale_x_discrete(labels=c("Doing math", "Watching sports"))
+```
+The plot agrees with what we saw in the LT; the elevation (relative to baseline)
+is greater when working on the math problem, when compared to the elevation 
+from watching sports.
+
+## Time to Recover
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+roll_check_single <- function(vec, ii, LL, UL, window=20) {
+  if(ii < window) {
+    return(NA)
+  }
+  #  stop("index ii has to be at least window size")
+  if(ii > length(vec))
+    stop("index ii should be at most the length of the vector")
+  tmp <- vec[(ii-window+1):ii]
+  tmp_id <- sum(tmp > UL | tmp < LL)
+  out <- sum(tmp_id)
+  out
+}
+#vec1 <- ex3$HR # interpolated HR
+#OOC <- sapply(1:length(vec1), roll_check_single, vec=vec1, LL=LL, UL=UL, 
+#              window = 20)
+#min(which(OOC <= 1))
+
+detect1 <- function(objs, trts, plot=FALSE) {
+  b <- which(trts == "baseline")
+  ex <- which(trts == "after_exercise")
+  
+  ex_obj <- objs[[ex]]
+  base_obj <- objs[[b]]
+  
+  UL <- mean(base_obj$HR) + 1.96*sd(base_obj$HR)
+  LL <- mean(base_obj$HR) - 1.96*sd(base_obj$HR)
+  
+  vec1 <- ex_obj$HR
+  OOC <- sapply(1:length(vec1), roll_check_single, vec=vec1, LL=LL, 
+                UL=UL, window = 20)
+  id <- tryCatch(min(which(OOC <= 1)), warning = function (e) return(NA))
+  if(is.na(id)) 
+    return(NA)
+  
+  if(plot) {
+    PlotHR(ex_obj)
+    abline(v=id/4, lty=2, col="red")
+  }
+  id/4
+}
+
+#### Using Piecewise linear regression
+f_lm <- function(y, id, tau) {
+  x <- ifelse(id <= tau, id, tau)
+  lm1 <- lm(y ~ x)
+  r2 <- summary(lm1)$r.squared
+  r2
+}
+
+detect2 <- function(objs, trts, plot=FALSE) {
+  b <- which(trts == "baseline")
+  ex <- which(trts == "after_exercise")
+  
+  ex_obj <- objs[[ex]]
+  base_obj <- objs[[b]]
+  
+  # base_obj unused here.
+  y <- ex_obj$HR
+  id <- 1:length(y)
+  
+  tau_vals <- id[20:length(id)]
+  r2_vals <- tryCatch(sapply(tau_vals, f_lm, y=y, id=id), 
+                      error = function(e) return(NA))
+  if(is.na(r2_vals[1]))
+    return(NA)
+  best_fit <- tau_vals[which.max(r2_vals)]
+  if(plot) {
+    PlotHR(ex_obj)
+    abline(v=best_fit/4, lty=2, col="red")
+  }
+  best_fit/4 # In seconds
+}
+
+interp <- function(x) {
+  out <- tryCatch(InterpolateNIHR(FilterNIHR(x)), 
+                  error = function(e) return(NA))
+  out
+}
+interp <- Vectorize(interp)
+```
+
+First, we filter out those we cannot use.
+```{r message=FALSE, echo=FALSE, warning=FALSE}
+ex_base <- filter(dd, trt %in% c("baseline", "after_exercise")) %>% 
+  mutate(rhrv2 = interp(rhrv)) %>% 
+  filter(!is.na(rhrv2))
+
+keep_these <- group_by(ex_base, pid) %>% count() %>% 
+  filter(n == 2)
+ex_base <- left_join(select(keep_these, pid), ex_base, by="pid") %>% 
+  filter(pid != "john", pid != "Tong")
+ttr <- group_by(ex_base, pid) %>% 
+  summarise(ttr1 = detect1(rhrv2, trt), 
+            ttr2 = detect2(rhrv2, trt))
+```
+The two metrics did not correlate highly enough. There has to be another round of
+data cleaning before they can be used properly. Even after the above, we see a 
+lot of changepoints detected at 5 seconds, due to poor initialisation of the devices.
