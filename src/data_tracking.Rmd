@@ -10,18 +10,18 @@ library(readxl)
 library(RHRV)
 ```
 
-
 ## Run sync script
 
-```{r}
-source("sync_script.R")
-dd <- readRDS("master_data.rds.2019-06-06-10-31")
+```{r echo=FALSE}
+#source("sync_script.R")
+dd <- readRDS("master_data.rds.2019-06-07-09-18")
+dd_old <- dd
 ```
 
 ## Read in namelist
 
-```{r}
-names2 <- read_excel("../Lab_Station_assignments.xlsx")
+```{r echo=FALSE}
+names2 <- read_excel("Lab_Station_assignments.xlsx")
 ```
 
 
@@ -46,29 +46,7 @@ dd %>%
   group_by(pid) %>% count()
 ```
 
-## Get Baseline Mean
-
-```{r}
-dd_base <- filter(dd, trt == "baseline")
-dd_base$rhrv2 <- lapply(dd_base$rhrv, function(x) InterpolateNIHR(FilterNIHR(x)))
-dd_base$mm <- sapply(dd_base$rhrv2, function(x) mean(x$HR))
-dd_base$sd <- sapply(dd_base$rhrv2, function(x) sd(x$HR))
-```
-
-### Make Plots
-
-```{r}
-ggplot(dd_base) + 
-  geom_jitter(aes(x=wt, y=mm))
-
-ggplot(dd_base) + 
-  geom_jitter(aes(x=ht, y=mm))
-
-ggplot(dd_base) + 
-  geom_boxplot(aes(x=gender, y=mm))
-```
-
-## Within Person ID
+## Within Person ID (More Data Cleaning)
 
 Does wt/ht/gender change within person ID?
 
@@ -80,6 +58,43 @@ dd %>% select(wt, pid) %>%
 dd %>% select(ht, pid) %>% 
   group_by(pid) %>% 
   summarise(t_unique = n_distinct(ht))
+```
+
+
+## Plot some outliers.
+
+```{r echo=FALSE, message=FALSE, fig.align='center'}
+#opar <- par(mfrow=c(1,2))
+PlotNIHR(dd_old$rhrv[[9]])
+PlotNIHR(FilterNIHR(dd_old$rhrv[[9]]))
+#par(opar)
+```
+
+
+## Get Baseline Mean
+
+```{r}
+dd_base <- filter(dd, trt == "baseline")
+dd_base$rhrv2 <- lapply(dd_base$rhrv, function(x) InterpolateNIHR(FilterNIHR(x)))
+dd_base$mm <- sapply(dd_base$rhrv2, function(x) mean(x$HR))
+dd_base$sd <- sapply(dd_base$rhrv2, function(x) sd(x$HR))
+```
+
+### Make Plots Q1
+
+1. scatterplot ht vs HR
+2. scatterplot wt vs HR
+3. boxplot males vs females
+
+```{r}
+ggplot(dd_base) + 
+  geom_jitter(aes(x=wt, y=mm))
+
+ggplot(dd_base) + 
+  geom_jitter(aes(x=ht, y=mm))
+
+ggplot(dd_base) + 
+  geom_boxplot(aes(x=gender, y=mm))
 ```
 
 ### Comparing to Baseline
@@ -96,6 +111,10 @@ dd_2 <- dd_2 %>% select(-rhrv, -rhrv2) %>%
         )
 dd_2
 ```
+
+Plots:
+
+1. boxplot of video vs math problem
 
 ```{r}
 dd_tmp <- dd_2 %>% gather(key = trt, value = hr, d1, baseline)
